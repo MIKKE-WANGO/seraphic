@@ -82,4 +82,21 @@ class ResetPasswordCodeAdmin(admin.ModelAdmin):
 
 admin.site.register(User, UserAdmin,)
 
+admin.site.register(Category)
+
+admin.site.register(SubCategory)
+
+admin.site.register(Product)
+
+admin.site.register(Event)
+
+admin.site.register(Capacity)
+
+
+admin.site.register(EventProduct)
+
+
+
+
+
 admin.site.register(ResetPasswordCode ,ResetPasswordCodeAdmin)
