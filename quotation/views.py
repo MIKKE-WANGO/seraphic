@@ -200,6 +200,7 @@ class ResetPassword(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )      
         else:
+            
             return Response(
                     {'error': 'Invalid OTP'},
                     status=status.HTTP_400_BAD_REQUEST
