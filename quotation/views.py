@@ -1,5 +1,6 @@
 import json
 from re import S
+from unicodedata import name
 from rest_framework.views import APIView
 from rest_framework import permissions, status
 from rest_framework.response import Response 
@@ -205,3 +206,182 @@ class ResetPassword(APIView):
                     {'error': 'Invalid OTP'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+
+
+
+class ManageEvent(APIView):
+    #check if an event that has not been submitted exists and if it does send back its details
+    def get(self, request, format=None):
+        user = request.user
+        if Event.objects.filter(user=user,submitted=False).exists():
+            event = Event.objects.get(user=user,submitted=False)
+            
+            event = EventSerializer(event)
+            return Response(
+                {'event': event.data, 'exists':True},
+                status=status.HTTP_200_OK
+            )
+        
+        else:
+            return Response(
+                {'exists':False},
+                status=status.HTTP_200_OK
+            )
+           
+    #create a new event & if a user has an event that is not submitted i delete it
+    def post(self, request, format=None):
+        user = request.user
+        data = request.data
+        title = data['title']
+        budget = data['budget']
+        guests = data['guests']
+        date = data['date']
+
+        if Event.objects.filter(user=user, submitted=False).exists():
+            event=Event.objects.get(user=user,submitted=False)
+            event.delete()
+
+        event = Event(user=user,title=title,budget=budget, guests=guests,date=date)
+        event.save()
+        return Response(
+                {'success': 'Event successfully created'},
+                status=status.HTTP_201_CREATED
+            )
+
+class ProductsCategoryView(APIView):
+    permission_classes = (permissions.AllowAny,) 
+
+    #Get products according to their category e.g tents,chairs
+    def post(self, request, format=None):
+        data = request.data
+        category = data['category']
+        
+        category = Category.objects.get(name=category)
+        
+        products = Product.objects.filter(category=category)
+        products = ProductSerializer(products, many=True)
+      
+        return Response(
+            {'products': products.data},
+            status=status.HTTP_200_OK
+        )  
+
+class TentView(APIView):
+    permission_classes = (permissions.AllowAny,) 
+    
+    def get(self, request, pk):
+        product = Product.objects.get(id=pk)
+        name = product.name + " draping"
+        draping = False
+        capacity = False
+        tent = ProductSerializer(product)  
+        if Product.objects.filter(name=name).exists():
+            draping = Product.objects.get(name=name)
+            draping = ProductSerializer(draping)
+
+            if Capacity.objects.filter(tent=product).exists():
+                capacity = Capacity.objects.get(tent=product)           
+                capacity = CapacitySerializer(capacity)
+                         
+                return Response(
+                    {'tent': tent.data, 'draping': draping.data, 'capacity':capacity.data },
+                    status=status.HTTP_200_OK
+                    )  
+            else:
+                return Response(
+                    {'tent': tent.data, 'draping': draping.data, 'capacity':capacity },
+                    status=status.HTTP_200_OK
+                    ) 
+        else:
+            if Capacity.objects.filter(tent=product).exists():
+                capacity = Capacity.objects.get(tent=product)           
+                capacity = CapacitySerializer(capacity)
+                return Response(
+                {'tent': tent.data, 'draping': draping, 'capacity':capacity.data },
+                status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                {'tent': tent.data, 'draping': draping, 'capacity':capacity },
+                status=status.HTTP_200_OK
+                )
+            
+ 
+class BudgetLeft(APIView):
+    def get(self, request, format=None):
+        data = request.data
+        user = request.user
+        event = Event.objects.get(user=user, submitted=False)
+        budget = event.budget
+        guests = event.guests
+        price = event.get_total_price
+        money_left = budget - price
+        
+        return Response(
+            {'money_left':money_left,'budget':budget,'guests':guests },
+            status=status.HTTP_200_OK
+        )  
+
+
+class AddProductToEvent(APIView):
+    def post(self, request, format=None):
+        user = request.user
+        event = Event.objects.get(user=user, submitted=False)
+        data = request.data
+        product = Product.objects.get(id=data['productId'])
+        quantity = int(data['quantity'])
+        #if product exists change the quantity only else create 
+        if EventProduct.objects.filter(event=event, product=product).exists():
+            eventproduct = EventProduct.objects.get(event=event, product=product)
+            eventproduct.quantity = quantity + eventproduct.quantity
+            eventproduct.save()
+        else:
+            eventproduct = EventProduct(event=event, product=product, quantity=quantity)
+            eventproduct.save()
+        return Response(
+                {'success': 'EventProduct successfully created'},
+                status=status.HTTP_201_CREATED
+            )
+
+     
+class ChairView(APIView):
+    permission_classes = (permissions.AllowAny,) 
+    
+    def get(self, request, pk):
+        product = Product.objects.get(id=pk)
+        sitcovers = False
+        tiebacks = False
+        chair = ProductSerializer(product)
+        sitcoversubcategory = SubCategory.objects.get(name='sitcover')
+        tiebacksubcategory = SubCategory.objects.get(name='tieback')
+        chiavari_subcategory = SubCategory.objects.get(name='chiavari chair')
+
+        if product.name == 'Plastic chair':
+            sitcovers = Product.objects.filter(subcategory=sitcoversubcategory)
+            tiebacks = Product.objects.filter(subcategory=tiebacksubcategory)
+            sitcovers = ProductSerializer(sitcovers,many=True)
+            tiebacks = ProductSerializer(tiebacks,many=True)
+            return Response(
+                {'chair': chair.data, 'sitcovers': sitcovers.data, 'tiebacks':tiebacks.data },
+                status=status.HTTP_200_OK
+                )
+
+        if product.subcategory == chiavari_subcategory:
+             
+            tiebacks = Product.objects.filter(subcategory=tiebacksubcategory)
+            tiebacks = ProductSerializer(tiebacks,many=True)
+            return Response(
+                {'chair': chair.data, 'sitcovers':False, 'tiebacks':tiebacks.data },
+                status=status.HTTP_200_OK
+                )
+
+        return Response(
+                {'chair': chair.data, 'sitcovers':False, 'tiebacks':False },
+                status=status.HTTP_200_OK
+                )
+        
+
+
+
+
+   

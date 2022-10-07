@@ -13,4 +13,22 @@ class ResetPasswordCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResetPasswordCode
         fields = ("code",)
-        
+    
+
+class EventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = ("title","budget", "guests", "date")
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+
+class CapacitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Capacity
+        fields = ('restaurant', 'theatre')
+

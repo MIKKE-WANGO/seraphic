@@ -80,6 +80,7 @@ class ResetPasswordCodeAdmin(admin.ModelAdmin):
     list_display = ('email', 'code', 'date_created', 'expiry_date')
 
 
+
 admin.site.register(User, UserAdmin,)
 
 admin.site.register(Category)

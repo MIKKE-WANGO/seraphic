@@ -76,8 +76,6 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-
-
 class SubCategory(models.Model):
     name = models.CharField(max_length=200,blank=True)
 
@@ -85,13 +83,11 @@ class SubCategory(models.Model):
         return self.name
 
 
-
-
 class Product(models.Model):
     name = models.CharField(max_length=200,blank=True)
-    Category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=False)
     
-    SubCategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=False)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null=True, blank=False)
     price = models.IntegerField(blank=True)
     description = models.TextField(null=True,blank=True)
     image = CloudinaryField('image',null=True,blank=True)
@@ -104,14 +100,21 @@ class Event(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True,)
     title = models.CharField(max_length=100, null=True)
     submitted = models.BooleanField(default=False)   
-    date = models.DateTimeField(null=True)
-    population = models.IntegerField(blank=True)
+    date = models.DateField(null=True)
+    guests = models.IntegerField(blank=True)
     budget = models.IntegerField(blank=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_submitted = models.DateTimeField(null=True)
 
     def __str__(self):
-        return self.user.email
+        return self.user.email + " " + str(self.id)
+
+    @property
+    def get_total_price(self):
+        eventitems = self.eventproduct_set.all()
+        total = sum([item.get_total_price for item in eventitems])
+        return total
+
 
 
 class EventProduct(models.Model):   
@@ -120,7 +123,12 @@ class EventProduct(models.Model):
     quantity = models.IntegerField(blank=True)
 
     def __str__(self):
-        return self.event
+        return self.product.name
+
+    @property
+    def get_total_price(self):
+        total = self.product.price * self.quantity
+        return total
 
 
 class Capacity(models.Model):
