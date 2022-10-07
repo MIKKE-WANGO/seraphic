@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/static/css/main.312be3d2.css",
+    "main.js": "/static/js/main.6bc95719.js",
+    "static/js/787.c4f40e06.chunk.js": "/static/js/787.c4f40e06.chunk.js",
+    "static/media/Seraphic-logo.jpg": "/static/media/Seraphic-logo.f3032e3832d3bff4cb37.jpg",
+    "index.html": "/index.html",
+    "main.312be3d2.css.map": "/static/css/main.312be3d2.css.map",
+    "main.6bc95719.js.map": "/static/js/main.6bc95719.js.map",
+    "787.c4f40e06.chunk.js.map": "/static/js/787.c4f40e06.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.312be3d2.css",
+    "static/js/main.6bc95719.js"
+  ]
+}
