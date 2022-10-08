@@ -13,6 +13,8 @@ urlpatterns = [
   path('products', ProductsCategoryView.as_view()),
   path('tent/<str:pk>', TentView.as_view()),
   path('chair/<str:pk>', ChairView.as_view()),
+  path('table/<str:pk>', TableView.as_view()),
+  path('decor/<str:pk>', DecorView.as_view()),
   path('budget', BudgetLeft.as_view()),
   path('addeventproduct', AddProductToEvent.as_view()),
   

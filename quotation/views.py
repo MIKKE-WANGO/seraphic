@@ -1,5 +1,4 @@
-import json
-from re import S
+
 from unicodedata import name
 from rest_framework.views import APIView
 from rest_framework import permissions, status
@@ -18,10 +17,7 @@ from django.utils.timezone import make_aware
 from django.core.mail import send_mail
 from django.contrib.postgres.search import SearchQuery,  SearchVector
 from rest_framework.decorators import api_view,permission_classes
-
 from rest_framework.permissions import AllowAny
-
-
 class RegisterView(APIView):
     permission_classes = (permissions.AllowAny,)
 
@@ -207,8 +203,6 @@ class ResetPassword(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-
-
 class ManageEvent(APIView):
     #check if an event that has not been submitted exists and if it does send back its details
     def get(self, request, format=None):
@@ -381,6 +375,36 @@ class ChairView(APIView):
                 )
         
 
+
+class TableView(APIView):
+    permission_classes = (permissions.AllowAny,) 
+    
+    def get(self, request, pk):
+        product = Product.objects.get(id=pk)
+        tablecloth = False
+        overlay = False
+        table = ProductSerializer(product)
+        overlay_category = SubCategory.objects.get(name='overlay')
+        tablecloth_category = SubCategory.objects.get(name='tablecloth')
+        tablecloth = Product.objects.filter(subcategory=tablecloth_category)
+        overlay = Product.objects.filter(subcategory=overlay_category)
+        tablecloth = ProductSerializer(tablecloth, many=True)
+        overlay = ProductSerializer(overlay, many= True)
+        return Response(
+                {'table': table.data, 'tablecloth':tablecloth.data, 'overlay':overlay.data },
+                status=status.HTTP_200_OK
+                )
+
+class DecorView(APIView):
+    permission_classes = (permissions.AllowAny,) 
+    
+    def get(self, request, pk):
+        product = Product.objects.get(id=pk)
+        product = ProductSerializer(product)
+        return Response(
+                {'decor': product.data,  },
+                status=status.HTTP_200_OK
+                )
 
 
 
