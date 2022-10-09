@@ -32,3 +32,8 @@ class CapacitySerializer(serializers.ModelSerializer):
         model = Capacity
         fields = ('restaurant', 'theatre')
 
+
+class EventProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventProduct
+        fields = "__all__"

@@ -1,4 +1,5 @@
 
+from asyncio import events
 from unicodedata import name
 from rest_framework.views import APIView
 from rest_framework import permissions, status
@@ -242,6 +243,18 @@ class ManageEvent(APIView):
                 status=status.HTTP_201_CREATED
             )
 
+class DeleteEvent(APIView):
+     def get(self, request, format=None):
+        user = request.user
+        if Event.objects.filter(user=user, submitted=False).exists():
+            event=Event.objects.get(user=user,submitted=False)
+            event.delete()
+        return Response(
+                {'success': 'Event successfully deleted'},
+                status=status.HTTP_201_CREATED
+            )
+
+
 class ProductsCategoryView(APIView):
     permission_classes = (permissions.AllowAny,) 
 
@@ -303,7 +316,6 @@ class TentView(APIView):
  
 class BudgetLeft(APIView):
     def get(self, request, format=None):
-        data = request.data
         user = request.user
         event = Event.objects.get(user=user, submitted=False)
         budget = event.budget
@@ -406,6 +418,90 @@ class DecorView(APIView):
                 status=status.HTTP_200_OK
                 )
 
+class Review(APIView):
+    
+    def get(self, request,):
+        user = request.user
+        event = Event.objects.get(user=user,submitted=False)
+        event_price = event.get_total_price
+        event_products = event.eventproduct_set.all()
+        products = []
+        for item in event_products:
+            #get serialized image from product table
+            p = Product.objects.get(id=item.product.id)
+            p = ProductSerializer(p)
+            p = p.data
+            name = p['name']
+            price=p['price']
+            product = {"id": item.id, "name": name, "price":price, "total_price":item.get_total_price,"quantity":item.quantity }
+            products.append(product)
+        return Response(
+                {'event_products': products,'total_price':event_price  },
+                status=status.HTTP_200_OK
+                )
+
+    #Delete an event_product
+    def post(self, request,):
+        user = request.user
+        data = request.data
+        id = data['id']
+        event = Event.objects.get(user=user,submitted=False)
+        event_product = EventProduct.objects.get(id=id,event=event)
+        event_product.delete()
+
+        return Response(
+                {"success": 'deleted successfully' },
+                status=status.HTTP_200_OK
+                )
+
+class QuoteView(APIView):
+    def post(self, request,):
+        user = request.user
+        data = request.data
+        id = data['id']
+        
+        event = Event.objects.get(user=user,submitted=True, id=id)
+        print(event)
+        event_price = event.get_total_price
+        event_products = event.eventproduct_set.all()
+        products = []
+        for item in event_products:
+            #get serialized image from product table
+            p = Product.objects.get(id=item.product.id)
+            p = ProductSerializer(p)
+            p = p.data
+            name = p['name']
+            price=p['price']
+            product = {"id": item.id, "name": name, "price":price, "total_price":item.get_total_price,"quantity":item.quantity }
+            products.append(product)
+        return Response(
+                {'event_products': products,'total_price':event_price  },
+                status=status.HTTP_200_OK
+                )
+
+#Send pdf after submitting to user and seraphic
+class SubmitQuote(APIView):
+    def get(self, request):
+        user = request.user
+        event = Event.objects.get(user=user,submitted=False)
+        event.submitted = True
+        event.date_submitted = datetime.now()
+        event.save()
+        return Response(
+                {"success": 'Submitted successfully' },
+                status=status.HTTP_200_OK
+                )
 
 
-   
+class QuotationList(APIView):
+    def get(self, request):
+        user = request.user
+        events = Event.objects.filter(user=user,submitted=True) 
+        quotations = []
+        for event in events:
+            q = {'name': event.title, 'total_price': event.get_total_price,'guests':event.guests, 'id':event.id}
+            quotations.append(q)
+        return Response(
+                {"events": quotations },
+                status=status.HTTP_200_OK
+                )
