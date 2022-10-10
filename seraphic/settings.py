@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-r1mpfvpe#xpdh@e)04dvy#t8x^+gdbssi%)*22un(l!=kx^68^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ 'seraphic-wango.herokuapp.com' ,'127.0.0.1', 'localhost',]
+ALLOWED_HOSTS = [ 'seraphic-wango.herokuapp.com' ,]
 
 
 # Application definition
