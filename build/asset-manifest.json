@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.33ad7233.css",
-    "main.js": "/static/js/main.029ce199.js",
+    "main.js": "/static/js/main.95a3cd27.js",
     "static/js/787.c4f40e06.chunk.js": "/static/js/787.c4f40e06.chunk.js",
     "static/media/Seraphic-logo.jpg": "/static/media/Seraphic-logo.f3032e3832d3bff4cb37.jpg",
     "static/media/walkway main.jpg": "/static/media/walkway main.2a5881512f1668cf27d2.jpg",
@@ -9,11 +9,11 @@
     "static/media/seraphic footer2.png": "/static/media/seraphic footer2.9f25464c35d0d163907c.png",
     "index.html": "/index.html",
     "main.33ad7233.css.map": "/static/css/main.33ad7233.css.map",
-    "main.029ce199.js.map": "/static/js/main.029ce199.js.map",
+    "main.95a3cd27.js.map": "/static/js/main.95a3cd27.js.map",
     "787.c4f40e06.chunk.js.map": "/static/js/787.c4f40e06.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.33ad7233.css",
-    "static/js/main.029ce199.js"
+    "static/js/main.95a3cd27.js"
   ]
 }
