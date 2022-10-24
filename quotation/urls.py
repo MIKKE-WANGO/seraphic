@@ -3,7 +3,7 @@ from .views import *
 
 
 urlpatterns = [
-    
+  #path('pdf_view', pdf_view,),
   path('register', RegisterView.as_view()),
   path('user-details', RetrieveUserView.as_view()),
   path('request-reset-code', SendResetPasswordCode.as_view()),

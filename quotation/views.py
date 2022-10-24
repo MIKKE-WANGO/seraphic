@@ -1,5 +1,9 @@
 
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent.parent
 from asyncio import events
+import email
+from django.core.mail import EmailMessage
 from unicodedata import name
 from rest_framework.views import APIView
 from rest_framework import permissions, status
@@ -13,12 +17,29 @@ from .models import *
 import random
 from datetime import datetime,timedelta
 
+from django.http import FileResponse
+
 import math
 from django.utils.timezone import make_aware
 from django.core.mail import send_mail
 from django.contrib.postgres.search import SearchQuery,  SearchVector
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import AllowAny
+
+#import pagination
+from django.core.paginator import Paginator
+
+#pdf 
+import io
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib.pagesizes import letter
+#ensures table is on center of page
+from reportlab.platypus import SimpleDocTemplate
+from reportlab.platypus import Table
+from reportlab.platypus import TableStyle
+from reportlab.lib import colors
 class RegisterView(APIView):
     permission_classes = (permissions.AllowAny,)
 
@@ -264,8 +285,9 @@ class ProductsCategoryView(APIView):
         category = data['category']
         
         category = Category.objects.get(name=category)
-        
-        products = Product.objects.filter(category=category)
+
+        #order objects randomly
+        products = Product.objects.filter(category=category).order_by('?')
         products = ProductSerializer(products, many=True)
       
         return Response(
@@ -461,7 +483,7 @@ class QuoteView(APIView):
         id = data['id']
         
         event = Event.objects.get(user=user,submitted=True, id=id)
-        print(event)
+        #print(event)
         event_price = event.get_total_price
         event_products = event.eventproduct_set.all()
         products = []
@@ -484,13 +506,170 @@ class SubmitQuote(APIView):
     def get(self, request):
         user = request.user
         event = Event.objects.get(user=user,submitted=False)
+        event_price = event.get_total_price
         event.submitted = True
         event.date_submitted = datetime.now()
         event.save()
+
+        #add lines of text
+        event_products = event.eventproduct_set.all()
+        products = [['Name', 'Quantity', 'Unit Price', 'Total Price',]]
+        for item in event_products:
+            #get serialized image from product table
+            p = Product.objects.get(id=item.product.id)
+            p = ProductSerializer(p)
+            p = p.data
+            name = p['name']
+            price=p['price']
+            product = [name,item.quantity,price,item.get_total_price,]
+            products.append(product)
+        
+        end = [' ', ' ', 'TOTAL COST', event_price]
+        products.append(end)
+
+        filename = 'Quote.pdf'
+
+        pdf = SimpleDocTemplate(
+            filename,
+            pagesize=letter
+        )
+        
+        table = Table(products)
+
+        style = TableStyle([
+        #('ALIGN',(0,0),(-1,-1), 'CENTER'),
+        #('FONTNAME', (0,0),(-1,0), 'Courier-Bold'),
+        ('FONTSIZE',(0,0),(-1,0), 15),
+        ('BOTTOMPADDING',(0,0),(-1,0),12),
+        ('BACKGROUND', (0,0),(-1,0), colors.firebrick),
+        #('BACKGROUND', (0,1),(-1,-1), colors.beige),,
+        ('BOTTOMPADDING',(0,1),(-1,-1),10),
+        ('TOPPADDING',(0,1),(-1,-1),10),
+        ('LINEBELOW',(0,-1),(-1,-1),2,colors.firebrick)
+        
+
+        ])
+        table.setStyle(style)
+
+        #alternate background row colors
+        rowNum = len(products)
+        for i in range(1,rowNum):
+            if i % 2 ==0:
+                color= colors.whitesmoke
+                text = colors.firebrick
+            else:
+                color = colors.white
+                text = colors.black
+
+            ts = TableStyle([
+                ('BACKGROUND', (0,i),(-1,i), color),
+                ('TEXTCOLOR',(0,i),(-1,i), text),
+                ('TEXTCOLOR',(0,-1),(-1,-1), colors.orange),
+                
+            ])
+            table.setStyle(ts)
+   
+        elems = []
+        elems.append(table)
+        
+        pdf.build(elems)
+    
+        message = EmailMessage(
+            'Quoataion',
+            'Below is a copy of your quoattion',
+            'mikemundati@gmail.com',
+            [user.email],
+        )
+        message.attach_file(BASE_DIR/'Quote.pdf')
+        message.send(fail_silently=False)
+
         return Response(
                 {"success": 'Submitted successfully' },
                 status=status.HTTP_200_OK
                 )
+
+
+def pdf_view(request):
+    user = User.objects.get(email='mikemundati@gmail.com')
+    event = Event.objects.get(user=user,submitted=False)
+    event_price = event.get_total_price
+   
+
+    #add lines of text
+    event_products = event.eventproduct_set.all()
+    products = [['Name', 'Quantity', 'Unit Price', 'Total Price',]]
+    for item in event_products:
+        #get serialized image from product table
+        p = Product.objects.get(id=item.product.id)
+        p = ProductSerializer(p)
+        p = p.data
+        name = p['name']
+        price=p['price']
+        product = [name,item.quantity,price,item.get_total_price,]
+        products.append(product)
+    
+    end = [' ', ' ', 'TOTAL COST', event_price]
+    products.append(end)
+
+    filename = 'Quote.pdf'
+
+    pdf = SimpleDocTemplate(
+        filename,
+        pagesize=letter
+    )
+    
+    table = Table(products)
+
+    style = TableStyle([
+       #('ALIGN',(0,0),(-1,-1), 'CENTER'),
+       #('FONTNAME', (0,0),(-1,0), 'Courier-Bold'),
+       ('FONTSIZE',(0,0),(-1,0), 15),
+       ('BOTTOMPADDING',(0,0),(-1,0),12),
+       ('BACKGROUND', (0,0),(-1,0), colors.firebrick),
+       #('BACKGROUND', (0,1),(-1,-1), colors.beige),,
+       ('BOTTOMPADDING',(0,1),(-1,-1),10),
+       ('TOPPADDING',(0,1),(-1,-1),10),
+       ('LINEBELOW',(0,-1),(-1,-1),2,colors.firebrick)
+       
+
+    ])
+    table.setStyle(style)
+
+    #alternate background row colors
+    rowNum = len(products)
+
+    for i in range(1,rowNum):
+        if i % 2 ==0:
+            color= colors.whitesmoke
+            text = colors.firebrick
+        else:
+            color = colors.white
+            text = colors.black
+
+        ts = TableStyle([
+            ('BACKGROUND', (0,i),(-1,i), color),
+            ('TEXTCOLOR',(0,i),(-1,i), text),
+            ('TEXTCOLOR',(0,-1),(-1,-1), colors.orange),
+            
+        ])
+        table.setStyle(ts)
+
+ 
+    elems = []
+    elems.append(table)
+    
+    pdf.build(elems)
+   
+    message = EmailMessage(
+        'Quoataion',
+       'Below is a copy of your quoattion',
+      'mikemundati@gmail.com',
+        ['mikemundati@gmail.com'],
+    )
+    message.attach_file(BASE_DIR/'Quote.pdf')
+    message.send(fail_silently=False)
+
+    return FileResponse(pdf,as_attachment=True, filename='quote.pdf')
 
 
 class QuotationList(APIView):
