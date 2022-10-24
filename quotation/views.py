@@ -575,7 +575,7 @@ class SubmitQuote(APIView):
         pdf.build(elems)
     
         message = EmailMessage(
-            'Quotaion Received',
+            'Quotation Received',
             'Your quotation has been Received by our team.\nYou will hear from us soon.\nBelow is a copy of your quoation',
             'mikemundati@gmail.com',
             [user.email],
