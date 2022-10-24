@@ -576,7 +576,7 @@ class SubmitQuote(APIView):
     
         message = EmailMessage(
             'Quotaion Received',
-            'Your quotation has been Received by our team.You will hear from us soon.Below is a copy of your quoation',
+            'Your quotation has been Received by our team\n.You will hear from us soon.\nBelow is a copy of your quoation',
             'mikemundati@gmail.com',
             [user.email],
         )
@@ -594,7 +594,6 @@ def pdf_view(request):
     event = Event.objects.get(user=user,submitted=False)
     event_price = event.get_total_price
    
-
     #add lines of text
     event_products = event.eventproduct_set.all()
     products = [['Name', 'Quantity', 'Unit Price', 'Total Price',]]
@@ -661,11 +660,11 @@ def pdf_view(request):
     pdf.build(elems)
    
     message = EmailMessage(
-        'Quoataion',
-       'Below is a copy of your quoattion',
-      'mikemundati@gmail.com',
-        ['mikemundati@gmail.com'],
-    )
+            'Quotaion Received',
+            'Your quotation has been Received by our team.\nYou will hear from us soon.\nBelow is a copy of your quoation',
+            'Mike',
+            [user.email],
+        )
     message.attach_file(BASE_DIR/'Quote.pdf')
     message.send(fail_silently=False)
 
