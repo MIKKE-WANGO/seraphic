@@ -576,7 +576,7 @@ class SubmitQuote(APIView):
     
         message = EmailMessage(
             'Quotaion Received',
-            'Your quotation has been Received by our team\n.You will hear from us soon.\nBelow is a copy of your quoation',
+            'Your quotation has been Received by our team.\nYou will hear from us soon.\nBelow is a copy of your quoation',
             'mikemundati@gmail.com',
             [user.email],
         )
@@ -662,7 +662,7 @@ def pdf_view(request):
     message = EmailMessage(
             'Quotaion Received',
             'Your quotation has been Received by our team.\nYou will hear from us soon.\nBelow is a copy of your quoation',
-            'Mike',
+            'mikemundati@gmail.com',
             [user.email],
         )
     message.attach_file(BASE_DIR/'Quote.pdf')
