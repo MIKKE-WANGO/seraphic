@@ -11,7 +11,7 @@ from cloudinary.models import CloudinaryField
 #custom user manager
 class UserAccountManager(BaseUserManager):
 
-    def create_user(self, email, name, password=None):
+    def create_user(self, email, name,phone, password=None):
         if not email:
             raise ValueError('Users must have email address')
 
@@ -23,6 +23,7 @@ class UserAccountManager(BaseUserManager):
         user = self.model(
             email = email,
             name = name,
+            phone=phone
             
         )
         user.set_password(password)
@@ -30,8 +31,8 @@ class UserAccountManager(BaseUserManager):
 
         return user
 
-    def create_superuser(self, email, name, password=None):
-        user = self.create_user(email, name, password)
+    def create_superuser(self, email, name,phone, password=None):
+        user = self.create_user(email, name,phone, password)
         user.is_superuser = True
         user.is_staff = True
         user.save()
@@ -43,6 +44,7 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
     #i can add any other fields i would want a user to have such as phone number
     email = models.EmailField(max_length=255, unique=True)
     name = models.CharField(max_length=255, null=True)
+    phone = models.CharField(max_length=10,null=True,blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
@@ -51,7 +53,7 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
     #determine what default login will be 
     #Normally it is 'username' but i want to use email
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name' ]
+    REQUIRED_FIELDS = ['name','phone' ]
 
     def get_full_name(self):
         return self.name

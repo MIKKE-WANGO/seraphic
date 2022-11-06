@@ -39,7 +39,13 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate
 from reportlab.platypus import Table
 from reportlab.platypus import TableStyle
+from reportlab.platypus import Paragraph, Spacer,Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import cm
 from reportlab.lib import colors
+
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER, TA_RIGHT
 class RegisterView(APIView):
     permission_classes = (permissions.AllowAny,)
 
@@ -49,12 +55,13 @@ class RegisterView(APIView):
         email = data['email']
         email = email.lower()
         password = data['password']
+        phone = data['phone']
    
         if len(password) >=6:
             
             if not User.objects.filter(email=email).exists():
             
-                User.objects.create_user(name=name, email=email, password=password)
+                User.objects.create_user(name=name, email=email, password=password,phone=phone)
                 return Response(
                             {'success': 'User created successfully'},
                             status=status.HTTP_201_CREATED
@@ -568,8 +575,19 @@ class SubmitQuote(APIView):
                 
             ])
             table.setStyle(ts)
-   
+            
+        a = Image('./Seraphic-logo.jpg')  
+        a.drawHeight = 1.3*inch
+        a.drawWidth = 3*inch
+
         elems = []
+        elems.append(a)
+        elems.append(Paragraph('Title: '+ event.title))
+        elems.append(Paragraph('Name: '+ user.name))
+        elems.append(Paragraph('Email: '+ user.email))
+        elems.append(Paragraph('Mobile: '+ user.phone))
+
+        elems.append(Spacer(5 * cm, 1 * cm))
         elems.append(table)
         
         pdf.build(elems)
@@ -588,6 +606,9 @@ class SubmitQuote(APIView):
                 status=status.HTTP_200_OK
                 )
 
+
+def onFirstPage(canvas, document):
+    canvas.drawCentredString(100, 100, 'Text drawn with onFirstPage')
 
 def pdf_view(request):
     user = User.objects.get(email='mikemundati@gmail.com')
@@ -653,20 +674,34 @@ def pdf_view(request):
         ])
         table.setStyle(ts)
 
+
  
+        
+    a = Image('./Seraphic-logo.jpg')  
+    a.drawHeight = 1.3*inch
+    a.drawWidth = 3*inch
+
     elems = []
+    elems.append(a)
+    elems.append(Paragraph('Title: '+ event.title))
+    elems.append(Paragraph('Name: '+ user.name))
+    elems.append(Paragraph('Email: '+ user.email))
+    elems.append(Paragraph('Mobile: '+ user.phone))
+
+    elems.append(Spacer(5 * cm, 1 * cm))
     elems.append(table)
     
     pdf.build(elems)
+    print('build')
    
-    message = EmailMessage(
-            'Quotaion Received',
-            'Your quotation has been Received by our team.\nYou will hear from us soon.\nBelow is a copy of your quoation',
-            'mikemundati@gmail.com',
-            [user.email],
-        )
-    message.attach_file(BASE_DIR/'Quote.pdf')
-    message.send(fail_silently=False)
+    #message = EmailMessage(
+    #        'Quotaion Received',
+     #       'Your quotation has been Received by our team.\nYou will hear from us soon.\nBelow is a copy of your quoation',
+     #       'mikemundati@gmail.com',
+     #       [user.email],
+     #   )
+    #message.attach_file(BASE_DIR/'Quote.pdf')
+    #message.send(fail_silently=False)
 
     return FileResponse(pdf,as_attachment=True, filename='quote.pdf')
 
