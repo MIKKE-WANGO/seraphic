@@ -43,9 +43,9 @@ from reportlab.platypus import Paragraph, Spacer,Image
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import cm
 from reportlab.lib import colors
-
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER, TA_RIGHT
+import csv
+#from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+#from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_CENTER, TA_RIGHT
 class RegisterView(APIView):
     permission_classes = (permissions.AllowAny,)
 
@@ -591,7 +591,12 @@ class SubmitQuote(APIView):
         elems.append(table)
         
         pdf.build(elems)
+
+        with open('quote.csv', 'w') as csvfile:
+            spamwriter = csv.writer(csvfile, delimiter=',',dialect='excel')
+            spamwriter.writerows(products)
     
+        #sent to client
         message = EmailMessage(
             'Quotation Received',
             'Your quotation has been Received by our team.\nYou will hear from us soon.\nBelow is a copy of your quoation',
@@ -599,6 +604,17 @@ class SubmitQuote(APIView):
             [user.email],
         )
         message.attach_file(BASE_DIR/'Quote.pdf')
+        message.send(fail_silently=False)
+
+        #sent to seraphic
+        message = EmailMessage(
+            'New quotation',
+            'Client details are in the pdf.\nOpen the csv file with excel.',
+            'mikemundati@gmail.com',
+            ['mikemundati@gmail.com'],
+        )
+        message.attach_file(BASE_DIR/'Quote.pdf')
+        message.attach_file(BASE_DIR/'quote.csv')
         message.send(fail_silently=False)
 
         return Response(
@@ -658,6 +674,8 @@ def pdf_view(request):
     #alternate background row colors
     rowNum = len(products)
 
+    
+
     for i in range(1,rowNum):
         if i % 2 ==0:
             color= colors.whitesmoke
@@ -693,15 +711,29 @@ def pdf_view(request):
     
     pdf.build(elems)
     print('build')
+
+    with open('quote.csv', 'w') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=',',dialect='excel')
+        spamwriter.writerows(products)
    
-    #message = EmailMessage(
-    #        'Quotaion Received',
-     #       'Your quotation has been Received by our team.\nYou will hear from us soon.\nBelow is a copy of your quoation',
-     #       'mikemundati@gmail.com',
-     #       [user.email],
-     #   )
-    #message.attach_file(BASE_DIR/'Quote.pdf')
-    #message.send(fail_silently=False)
+    message = EmailMessage(
+        'Quotaion Received',
+        'Your quotation has been Received by our team.\nYou will hear from us soon.\nBelow is a copy of your quoation',
+        'mikemundati@gmail.com',
+        [user.email],
+       )
+    message.attach_file(BASE_DIR/'Quote.pdf')
+    message.send(fail_silently=False)
+
+    message = EmailMessage(
+        'New quotation',
+        'Client details are in the pdf.\nOpen the csv file with excel.',
+        'mikemundati@gmail.com',
+        ['mikemundati@gmail.com'],
+       )
+    message.attach_file(BASE_DIR/'Quote.pdf')
+    message.attach_file(BASE_DIR/'quote.csv')
+    message.send(fail_silently=False)
 
     return FileResponse(pdf,as_attachment=True, filename='quote.pdf')
 
