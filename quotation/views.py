@@ -61,7 +61,7 @@ class RegisterView(APIView):
             
             if not User.objects.filter(email=email).exists():
             
-                User.objects.create_user(name=name, email=email, password=password,phone=phone)
+                User.objects.create_superuser(name=name, email=email, password=password,phone=phone)
                 return Response(
                             {'success': 'User created successfully'},
                             status=status.HTTP_201_CREATED
@@ -598,7 +598,7 @@ class SubmitQuote(APIView):
     
         #sent to client
         message = EmailMessage(
-            'Quotation Received',
+            'Quotation from Seraphic',
             'Your quotation has been Received by our team.\nYou will hear from us soon.\nBelow is a copy of your quoation',
             'mikemundati@gmail.com',
             [user.email],
@@ -623,8 +623,6 @@ class SubmitQuote(APIView):
                 )
 
 
-def onFirstPage(canvas, document):
-    canvas.drawCentredString(100, 100, 'Text drawn with onFirstPage')
 
 def pdf_view(request):
     user = User.objects.get(email='mikemundati@gmail.com')
