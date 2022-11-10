@@ -34,7 +34,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', default='your secret key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ 'seraphic-wango.herokuapp.com' ,'127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [ 'seraphic-wango.herokuapp.com' ,'127.0.0.1', 'localhost','https://seraphic-0kq8.onrender.com']
 
 
 # Application definition
@@ -198,7 +198,7 @@ cloudinary.config(
   api_secret = os.environ.get('api_secret')
 )
 
-CORS_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://localhost:8000','https://seraphic-wango.herokuapp.com']
+CORS_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://localhost:8000','https://seraphic-wango.herokuapp.com','https://seraphic-0kq8.onrender.com']
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
