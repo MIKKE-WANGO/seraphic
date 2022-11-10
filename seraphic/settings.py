@@ -34,7 +34,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', default='your secret key')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [ 'seraphic-wango.herokuapp.com' ,'127.0.0.1', 'localhost','https://seraphic-0kq8.onrender.com']
+ALLOWED_HOSTS = [ 'seraphic-wango.herokuapp.com' ,'127.0.0.1', 'localhost','seraphic-0kq8.onrender.com']
 
 
 # Application definition
